@@ -39,6 +39,6 @@
     "ts-node": "^7.0.1"
   },
   "engines": {
-    "node": "8.x"
+    "node": "16.x"
   }
 }
