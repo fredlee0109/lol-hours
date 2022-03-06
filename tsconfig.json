@@ -4,16 +4,13 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "es2017"
-    ],
+    "lib": ["dom", "es2017"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmit": true,
     "noUnusedLocals": true,
     "noImplicitAny": false,
-    // "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "preserveConstEnums": true,
     "pretty": true,
     "removeComments": false,
@@ -27,12 +24,6 @@
     "isolatedModules": true,
     "incremental": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

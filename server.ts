@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import createServer from "next";
 import router from "./api";
@@ -22,14 +23,36 @@ nextServer
     });
 
     server.get("/test", async (req, res) => {
-      const rAPI = new RiotAPI("RGAPI-03bdac19-3a7f-4760-8187-7a4c57cb4436");
+      try {
+        const rAPI = new RiotAPI(process.env.RIOT_API_KEY!);
 
-      const summoner: RiotAPITypes.Summoner.SummonerDTO =
-        await rAPI.summoner.getBySummonerName({
-          region: PlatformId.EUW1,
-          summonerName: "Demos Kratos",
+        const summoner: RiotAPITypes.Summoner.SummonerDTO =
+          await rAPI.summoner.getBySummonerName({
+            region: PlatformId.NA1,
+            summonerName: "rnuji",
+          });
+        const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
+          cluster: PlatformId.AMERICAS,
+          puuid: summoner.puuid,
+          params: {
+            // count: 100,
+            count: 5,
+          },
         });
-      res.send(summoner);
+
+        const matchDtos: RiotAPITypes.MatchV5.MatchDTO[] = await Promise.all(
+          matches.map(async (matchId) => {
+            return await rAPI.matchV5.getMatchById({
+              cluster: PlatformId.AMERICAS,
+              matchId: matchId,
+            });
+          })
+        );
+        res.send(matchDtos);
+      } catch (error) {
+        console.error("ERROR: ", error, typeof error);
+        res.status(500).send(error);
+      }
     });
 
     server.get("*", (req, res) => {

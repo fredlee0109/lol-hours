@@ -39,7 +39,7 @@ export default function Index(props) {
 
   return (
     <Layout>
-      <h1>Batman TV Shows</h1>
+      <h1>Naruto TV Shows</h1>
       <ul>
         {props.shows.map(({ show }) => (
           <ShowLink key={show.id} show={show} />
@@ -77,7 +77,7 @@ export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
   const { data } = await axios.get(
-    "https://api.tvmaze.com/search/shows?q=batman"
+    "https://api.tvmaze.com/search/shows?q=naruto"
   );
 
   console.log(`Show data fetched. Count: ${data.length}`);
