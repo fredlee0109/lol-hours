@@ -1,9 +1,9 @@
 import Layout from "../components/MyLayout";
 import Link from "next/link";
-import fetch from "isomorphic-unfetch";
 
 import axios from "axios";
 import { useEffect } from "react";
+import { GetStaticProps, GetStaticPropsContext } from "next";
 
 function ShowLink({ show }) {
   return (
@@ -73,13 +73,18 @@ export default function Index(props) {
   );
 }
 
-Index.getInitialProps = async function () {
-  const res = await fetch("https://api.tvmaze.com/search/shows?q=batman");
-  const data = await res.json();
+export const getStaticProps: GetStaticProps = async (
+  context: GetStaticPropsContext
+) => {
+  const { data } = await axios.get(
+    "https://api.tvmaze.com/search/shows?q=batman"
+  );
 
   console.log(`Show data fetched. Count: ${data.length}`);
 
   return {
-    shows: data,
+    props: {
+      shows: data,
+    },
   };
 };

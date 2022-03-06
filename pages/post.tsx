@@ -1,5 +1,5 @@
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Layout from "../components/MyLayout";
-import fetch from "isomorphic-unfetch";
 
 export default function Post(props) {
   return (
@@ -11,12 +11,18 @@ export default function Post(props) {
   );
 }
 
-Post.getInitialProps = async function (context) {
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const { id } = context.query;
   const res = await fetch(`https://api.tvmaze.com/shows/${id}`);
   const show = await res.json();
 
   console.log(`Fetched show: ${show.name}`);
 
-  return { show };
+  return {
+    props: {
+      show,
+    },
+  };
 };

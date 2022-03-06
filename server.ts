@@ -1,6 +1,7 @@
 import express from "express";
 import createServer from "next";
 import router from "./api";
+import { RiotAPI, RiotAPITypes, PlatformId } from "@fightmegg/riot-api";
 
 const dev = process.env.NODE_ENV !== "production";
 const nextServer = createServer({ dev });
@@ -16,14 +17,23 @@ nextServer
     server.get("/p/:id", (req, res) => {
       const actualPage = "/post";
       const queryParams = { id: req.params.id };
+
       nextServer.render(req, res, actualPage, queryParams);
     });
 
-    server.get("/test", (req, res) => {
-      res.send("test");
+    server.get("/test", async (req, res) => {
+      const rAPI = new RiotAPI("RGAPI-03bdac19-3a7f-4760-8187-7a4c57cb4436");
+
+      const summoner: RiotAPITypes.Summoner.SummonerDTO =
+        await rAPI.summoner.getBySummonerName({
+          region: PlatformId.EUW1,
+          summonerName: "Demos Kratos",
+        });
+      res.send(summoner);
     });
 
     server.get("*", (req, res) => {
+      console.log("FRED server.get(*)");
       return requestHandler(req, res);
     });
 
