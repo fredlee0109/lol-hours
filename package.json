@@ -24,7 +24,6 @@
     "next": "^12.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-markdown": "^8.0.0",
     "typescript": "^4.6.2"
   },
   "devDependencies": {
@@ -38,9 +37,10 @@
     "@types/react-dom": "^17.0.13",
     "@types/styled-jsx": "^2.2.9",
     "nodemon": "^2.0.15",
+    "tailwindcss": "^3.0.23",
     "ts-node": "^10.6.0"
   },
   "engines": {
-    "node": "16.x"
+    "node": "14.x"
   }
 }

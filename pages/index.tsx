@@ -1,9 +1,7 @@
-import Layout from "../components/MyLayout";
-import Link from "next/link";
-
 import axios from "axios";
-import { useEffect } from "react";
 import { GetStaticProps, GetStaticPropsContext } from "next";
+import Link from "next/link";
+import Layout from "../components/MyLayout";
 
 function ShowLink({ show }) {
   return (
@@ -31,12 +29,6 @@ function ShowLink({ show }) {
 }
 
 export default function Index(props) {
-  useEffect(() => {
-    axios.get("/test").then((res) => {
-      console.log("FRED", res, res.data);
-    });
-  }, []);
-
   return (
     <Layout>
       <h1>Naruto TV Shows</h1>
