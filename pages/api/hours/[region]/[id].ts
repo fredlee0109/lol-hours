@@ -1,22 +1,30 @@
+// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { RiotAPI, RiotAPITypes, PlatformId } from "@fightmegg/riot-api";
-import express from "express";
+import type { NextApiRequest, NextApiResponse } from "next";
+import "dotenv/config";
 
-const router = express.Router();
+type ResponseData = {
+  data?: RiotAPITypes.MatchV5.MatchDTO[];
+};
 
-router.get("/hours/:region/:id", async function (req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>
+) {
   try {
+    const platform: RiotAPITypes.LoLRegion = req.query
+      .request as unknown as RiotAPITypes.LoLRegion;
     const rAPI = new RiotAPI(process.env.RIOT_API_KEY!);
-
     const summoner: RiotAPITypes.Summoner.SummonerDTO =
       await rAPI.summoner.getBySummonerName({
-        region: PlatformId[req.params.region],
-        summonerName: req.params.id,
+        // region: platform,
+        region: PlatformId.NA1,
+        summonerName: req.query.id as string,
       });
     const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
       cluster: PlatformId.AMERICAS,
       puuid: summoner.puuid,
       params: {
-        // count: 100,
         count: 5,
       },
     });
@@ -29,11 +37,9 @@ router.get("/hours/:region/:id", async function (req, res) {
         });
       })
     );
-    res.send(matchDtos);
+    res.status(200).send({ data: matchDtos });
   } catch (error) {
     console.error("api.ts ERROR: ", error, typeof error);
-    res.status(500).send(error);
+    res.status(500).send({});
   }
-});
-
-export default router;
+}

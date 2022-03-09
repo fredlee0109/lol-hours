@@ -1,6 +1,0 @@
-{
-  "watch": ["server.ts", "api.ts", "tsconfig.json"],
-  "execMap": {
-    "ts": "ts-node --typeCheck --compilerOptions '{\"module\":\"commonjs\"}'"
-  }
-}

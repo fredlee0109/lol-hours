@@ -1,3 +1,0 @@
---timeout 15000
---recursive
-test/specs/**/*.ts

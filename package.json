@@ -1,46 +1,45 @@
 {
   "name": "lol-hours",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "dev": "nodemon server.ts",
-    "build": "next build && tsc --project tsconfig.server.json",
-    "postinstall": "npm run build",
-    "start": "NODE_ENV=production node .next/production-server/server.js",
-    "test": "mocha -r ts-node/register"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "keywords": [],
+  "keywords": [
+    "League",
+    "LoL",
+    "League of Legends",
+    "Wasted on LoL",
+    "Wasted on League",
+    "Wasted on League of Legends",
+    "Time Spent on League",
+    "Time Spent on League of Legends",
+    "Time Spent on LoL",
+    "Time on League",
+    "Time on League of Legends",
+    "Time on LoL"
+  ],
   "author": "Fred Lee",
   "license": "MIT",
   "dependencies": {
     "@fightmegg/riot-api": "^0.0.8",
-    "@zeit/next-typescript": "^1.1.1",
     "axios": "^0.26.0",
-    "chai": "^4.3.6",
+    "classnames": "^2.3.1",
     "dotenv": "^16.0.0",
-    "express": "^4.17.3",
-    "mocha": "^9.2.1",
-    "next": "^12.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "typescript": "^4.6.2"
+    "next": "12.1.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.0",
-    "@types/express": "^4.17.13",
-    "@types/jest": "^27.4.1",
-    "@types/mocha": "^9.1.0",
-    "@types/next": "^8.0.7",
-    "@types/node": "^17.0.21",
-    "@types/react": "^17.0.39",
-    "@types/react-dom": "^17.0.13",
-    "@types/styled-jsx": "^2.2.9",
+    "@types/node": "17.0.21",
+    "@types/react": "17.0.39",
+    "eslint": "8.10.0",
+    "eslint-config-next": "12.1.0",
     "nodemon": "^2.0.15",
     "tailwindcss": "^3.0.23",
-    "ts-node": "^10.6.0"
-  },
-  "engines": {
-    "node": "14.x"
+    "typescript": "4.6.2"
   }
 }
