@@ -63,15 +63,19 @@ export default async function handler(
         .map(async (matchId, index, { length }) => {
           matchesComputed++;
           // https://developer.riotgames.com/apis#match-v5/GET_getMatch
-          const match: RiotAPITypes.MatchV5.MatchDTO =
-            await rAPI.matchV5.getMatchById({
-              cluster: cluster,
-              matchId: matchId,
-            });
+          try {
+            const match: RiotAPITypes.MatchV5.MatchDTO =
+              await rAPI.matchV5.getMatchById({
+                cluster: cluster,
+                matchId: matchId,
+              });
 
-          timeSpent += match.info.gameDuration;
-          if (index + 1 === length) {
-            firstGameTime = moment(match.info.gameCreation);
+            timeSpent += match.info.gameDuration;
+            if (index + 1 === length) {
+              firstGameTime = moment(match.info.gameCreation);
+            }
+          } catch (error) {
+            console.error("ERROR in matchv5.getMatchById", error);
           }
         })
     );
