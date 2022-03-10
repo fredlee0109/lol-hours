@@ -1,6 +1,7 @@
-import { RiotAPI, RiotAPITypes, PlatformId } from "@fightmegg/riot-api";
-import type { NextApiRequest, NextApiResponse } from "next";
+import { PlatformId, RiotAPI, RiotAPITypes } from "@fightmegg/riot-api";
 import "dotenv/config";
+import moment, { Moment } from "moment";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 console.log("process.env.RIOT_API_KEY", process.env.RIOT_API_KEY);
@@ -21,8 +22,10 @@ const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
 
 type ResponseData = {
   matchesComputed?: number;
-  duration?: number;
+  timeSpent?: number;
   data?: RiotAPITypes.MatchV5.MatchDTO[];
+  firstGameTime?: Moment;
+  daysSinceFirstGame?: number;
 };
 
 export default async function handler(
@@ -30,15 +33,8 @@ export default async function handler(
   res: NextApiResponse<ResponseData>
 ) {
   try {
-    console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-    console.log("process.env.RIOT_API_KEY", process.env.RIOT_API_KEY);
-    console.log("rAPI", rAPI);
-
     let quota: number = parseInt(process.env.QUOTA as string);
     const { region, cluster } = getRegion(req.query.region as string);
-
-    console.log("region", region);
-    console.log("cluster", cluster);
 
     // https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
     const summoner: RiotAPITypes.Summoner.SummonerDTO =
@@ -47,8 +43,6 @@ export default async function handler(
         summonerName: req.query.id as string,
       });
     quota--;
-
-    // console.log("summoner", summoner);
 
     // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
     const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
@@ -60,38 +54,36 @@ export default async function handler(
     });
     quota--;
 
-    console.log("matches", matches);
-
-    let firstGameTime: Date;
+    let firstGameTime: Moment;
     let matchesComputed = 0;
-    let duration = 0;
+    let timeSpent = 0;
     await Promise.all(
       matches
         .filter((_match, index) => index < quota)
         .map(async (matchId, index, { length }) => {
           matchesComputed++;
-          console.log("FRED START", Date.now());
           // https://developer.riotgames.com/apis#match-v5/GET_getMatch
           const match: RiotAPITypes.MatchV5.MatchDTO =
             await rAPI.matchV5.getMatchById({
               cluster: cluster,
               matchId: matchId,
             });
-          console.log("FRED END", Date.now());
 
-          console.log("match", match);
-          duration += match.info.gameDuration;
+          timeSpent += match.info.gameDuration;
           if (index + 1 === length) {
-            firstGameTime = new Date(match.info.gameCreation);
-            console.log("FRED FOUND FIRST", new Date(match.info.gameCreation));
+            firstGameTime = moment(match.info.gameCreation);
           }
         })
     );
-    console.log("FRED firstGameTime", firstGameTime!);
 
-    res
-      .status(200)
-      .send({ matchesComputed: matchesComputed, duration: duration });
+    const daysSinceFirstGame = moment().diff(moment(firstGameTime!), "d");
+
+    res.status(200).send({
+      matchesComputed: matchesComputed,
+      timeSpent: timeSpent,
+      firstGameTime: firstGameTime!,
+      daysSinceFirstGame: daysSinceFirstGame,
+    });
   } catch (error) {
     console.error("api.ts ERROR: ", error, typeof error);
     res.status(500).send({});
