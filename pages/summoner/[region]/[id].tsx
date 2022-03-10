@@ -20,7 +20,7 @@ export default function Post(props: Data) {
       .catch((error) => {
         console.error("Post.tsx error:", error);
       });
-  });
+  }, []);
 
   return (
     <>

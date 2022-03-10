@@ -3,6 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import "dotenv/config";
 
 console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+console.log("process.env.RIOT_API_KEY", process.env.RIOT_API_KEY);
+
 const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
   debug: process.env.NODE_ENV === "development",
   cache: {
@@ -31,7 +33,7 @@ export default async function handler(
     let quota: number = parseInt(process.env.QUOTA as string);
     const { region, cluster } = getRegion(req.query.region as string);
 
-    // https://developer.riotgames.com/apis#match-v5
+    // https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
     const summoner: RiotAPITypes.Summoner.SummonerDTO =
       await rAPI.summoner.getBySummonerName({
         region: region,
@@ -39,7 +41,7 @@ export default async function handler(
       });
     quota--;
 
-    // https://developer.riotgames.com/apis#match-v5
+    // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
     const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
       cluster: cluster,
       puuid: summoner.puuid,
@@ -57,6 +59,7 @@ export default async function handler(
         .filter((_match, index) => index < quota)
         .map(async (matchId, index, { length }) => {
           matchesComputed++;
+          // https://developer.riotgames.com/apis#match-v5/GET_getMatch
           const res: RiotAPITypes.MatchV5.MatchDTO =
             await rAPI.matchV5.getMatchById({
               cluster: cluster,
