@@ -30,6 +30,10 @@ export default async function handler(
   res: NextApiResponse<ResponseData>
 ) {
   try {
+    console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+    console.log("process.env.RIOT_API_KEY", process.env.RIOT_API_KEY);
+    console.log("rAPI", rAPI);
+
     let quota: number = parseInt(process.env.QUOTA as string);
     const { region, cluster } = getRegion(req.query.region as string);
 
