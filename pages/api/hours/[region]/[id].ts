@@ -48,7 +48,7 @@ export default async function handler(
       });
     quota--;
 
-    console.log("summoner", summoner);
+    // console.log("summoner", summoner);
 
     // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
     const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
@@ -70,17 +70,20 @@ export default async function handler(
         .filter((_match, index) => index < quota)
         .map(async (matchId, index, { length }) => {
           matchesComputed++;
+          console.log("FRED START", Date.now());
           // https://developer.riotgames.com/apis#match-v5/GET_getMatch
-          const res: RiotAPITypes.MatchV5.MatchDTO =
+          const match: RiotAPITypes.MatchV5.MatchDTO =
             await rAPI.matchV5.getMatchById({
               cluster: cluster,
               matchId: matchId,
             });
-          console.log("FRED creation", index, new Date(res.info.gameCreation));
-          duration += res.info.gameDuration;
+          console.log("FRED END", Date.now());
+
+          console.log("match", match);
+          duration += match.info.gameDuration;
           if (index + 1 === length) {
-            firstGameTime = new Date(res.info.gameCreation);
-            console.log("FRED FOUND IT", new Date(res.info.gameCreation));
+            firstGameTime = new Date(match.info.gameCreation);
+            console.log("FRED FOUND FIRST", new Date(match.info.gameCreation));
           }
         })
     );
