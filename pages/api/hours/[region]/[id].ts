@@ -37,6 +37,9 @@ export default async function handler(
     let quota: number = parseInt(process.env.QUOTA as string);
     const { region, cluster } = getRegion(req.query.region as string);
 
+    console.log("region", region);
+    console.log("cluster", cluster);
+
     // https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
     const summoner: RiotAPITypes.Summoner.SummonerDTO =
       await rAPI.summoner.getBySummonerName({
@@ -44,6 +47,8 @@ export default async function handler(
         summonerName: req.query.id as string,
       });
     quota--;
+
+    console.log("summoner", summoner);
 
     // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
     const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
@@ -54,6 +59,8 @@ export default async function handler(
       },
     });
     quota--;
+
+    console.log("matches", matches);
 
     let firstGameTime: Date;
     let matchesComputed = 0;
