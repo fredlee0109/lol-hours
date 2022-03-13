@@ -12,9 +12,9 @@ const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
     cacheType: "local",
     ttls: {
       byMethod: {
-        [RiotAPITypes.METHOD_KEY.MATCH_V5.GET_MATCH_BY_ID]: 1000 * 60 * 10, // 10min in ms
-        [RiotAPITypes.METHOD_KEY.SUMMONER.GET_BY_SUMMONER_NAME]: 1000 * 60 * 10, // 10min in ms
-        [RiotAPITypes.METHOD_KEY.MATCH_V5.GET_IDS_BY_PUUID]: 1000 * 60 * 10, // 10min in ms
+        [RiotAPITypes.METHOD_KEY.MATCH_V5.GET_MATCH_BY_ID]: 1000 * 60 * 60, // 1hr in ms
+        [RiotAPITypes.METHOD_KEY.SUMMONER.GET_BY_SUMMONER_NAME]: 1000 * 60 * 60, // 1hr in ms
+        [RiotAPITypes.METHOD_KEY.MATCH_V5.GET_IDS_BY_PUUID]: 1000 * 60 * 60, // 1hr in ms
       },
     },
   },
@@ -22,10 +22,12 @@ const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
 
 type ResponseData = {
   matchesComputed?: number;
-  timeSpent?: number;
+  timeSpentInHours?: number;
   data?: RiotAPITypes.MatchV5.MatchDTO[];
   firstGameTime?: Moment;
   daysSinceFirstGame?: number;
+  averageGameTime?: number;
+  matchesPlayed?: number;
 };
 
 export default async function handler(
@@ -33,7 +35,6 @@ export default async function handler(
   res: NextApiResponse<ResponseData>
 ) {
   try {
-    let quota: number = parseInt(process.env.QUOTA as string);
     const { region, cluster } = getRegion(req.query.region as string);
 
     // https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
@@ -42,51 +43,54 @@ export default async function handler(
         region: region,
         summonerName: req.query.id as string,
       });
-    quota--;
 
-    // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
-    const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
-      cluster: cluster,
-      puuid: summoner.puuid,
-      params: {
-        count: 100, // 100 is maximum.
-      },
-    });
-    quota--;
-
+    let matchesPlayed = 0;
+    let lastMatchId = "";
     let firstGameTime: Moment;
-    let matchesComputed = 0;
-    let timeSpent = 0;
-    await Promise.all(
-      matches
-        .filter((_match, index) => index < quota)
-        .map(async (matchId, index, { length }) => {
-          matchesComputed++;
-          // https://developer.riotgames.com/apis#match-v5/GET_getMatch
-          try {
-            const match: RiotAPITypes.MatchV5.MatchDTO =
-              await rAPI.matchV5.getMatchById({
-                cluster: cluster,
-                matchId: matchId,
-              });
+    const batchCount = 100; // 100 is maximum.
+    for (let i = 0; i < 100; i++) {
+      // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
+      const matches: string[] = await rAPI.matchV5.getIdsbyPuuid({
+        cluster: cluster,
+        puuid: summoner.puuid,
+        params: {
+          count: batchCount,
+          start: batchCount * i,
+        },
+      });
+      if (matches.length) {
+        matchesPlayed += matches.length;
+        console.log("matchesPlayed", matchesPlayed);
+        lastMatchId = matches[matches.length - 1];
+      } else {
+        break;
+      }
+    }
 
-            timeSpent += match.info.gameDuration;
-            if (index + 1 === length) {
-              firstGameTime = moment(match.info.gameCreation);
-            }
-          } catch (error) {
-            console.error("ERROR in matchv5.getMatchById", error);
-          }
-        })
-    );
-
-    const daysSinceFirstGame = moment().diff(moment(firstGameTime!), "d");
+    if (lastMatchId) {
+      // https://developer.riotgames.com/apis#match-v5/GET_getMatch
+      const match: RiotAPITypes.MatchV5.MatchDTO =
+        await rAPI.matchV5.getMatchById({
+          cluster: cluster,
+          matchId: lastMatchId!,
+        });
+      firstGameTime = moment(match.info.gameCreation);
+      console.log(
+        "first match",
+        moment(firstGameTime),
+        match.info.gameName,
+        match.info.gameMode,
+        match.info.gameType,
+        match.info.gameVersion,
+        match.info.mapId,
+        match.info.queueId
+      );
+    }
 
     res.status(200).send({
-      matchesComputed: matchesComputed,
-      timeSpent: timeSpent,
+      timeSpentInHours: matchesPlayed * 0.5,
       firstGameTime: firstGameTime!,
-      daysSinceFirstGame: daysSinceFirstGame,
+      matchesPlayed: matchesPlayed,
     });
   } catch (error) {
     console.error("api.ts ERROR: ", error, typeof error);
