@@ -22,9 +22,10 @@ const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
 
 type ResponseData = {
   matchesComputed?: number;
-  timeSpentInHours?: number;
+  totalHoursSpent?: number;
+  dailyAverageHoursSpent?: number;
   data?: RiotAPITypes.MatchV5.MatchDTO[];
-  firstGameTime?: Moment;
+  firstGameDate?: Moment;
   daysSinceFirstGame?: number;
   averageGameTime?: number;
   matchesPlayed?: number;
@@ -46,7 +47,7 @@ export default async function handler(
 
     let matchesPlayed = 0;
     let lastMatchId = "";
-    let firstGameTime: Moment;
+    let firstGameDate: Moment;
     const batchCount = 100; // 100 is maximum.
     for (let i = 0; i < 100; i++) {
       // https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
@@ -74,10 +75,10 @@ export default async function handler(
           cluster: cluster,
           matchId: lastMatchId!,
         });
-      firstGameTime = moment(match.info.gameCreation);
+      firstGameDate = moment(match.info.gameCreation);
       console.log(
         "first match",
-        moment(firstGameTime),
+        moment(firstGameDate),
         match.info.gameName,
         match.info.gameMode,
         match.info.gameType,
@@ -87,9 +88,12 @@ export default async function handler(
       );
     }
 
+    const totalHoursSpent = matchesPlayed * 0.5;
     res.status(200).send({
-      timeSpentInHours: matchesPlayed * 0.5,
-      firstGameTime: firstGameTime!,
+      totalHoursSpent: totalHoursSpent,
+      dailyAverageHoursSpent:
+        totalHoursSpent / moment().diff(firstGameDate!, "d"),
+      firstGameDate: firstGameDate!,
       matchesPlayed: matchesPlayed,
     });
   } catch (error) {

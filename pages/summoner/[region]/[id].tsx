@@ -2,13 +2,17 @@ import axios from "axios";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import { loadProgressBar } from "axios-progress-bar";
+import "axios-progress-bar/dist/nprogress.css";
 
-interface Data {
+// https://github.com/rikmms/progress-bar-4-axios/
+loadProgressBar();
+interface Props {
   region: string;
   id: string;
 }
 
-export default function Post(props: Data) {
+export default function Post(props: Props) {
   const [response, setResponse] = useState([]);
 
   useEffect(() => {
