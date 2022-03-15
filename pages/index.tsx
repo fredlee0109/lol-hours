@@ -4,6 +4,7 @@ import classNames from "classnames";
 import Head from "next/head";
 import Image from "next/image";
 import Header from "../components/Header";
+import Search from "../components/Search";
 
 const navigation = [
   { name: "League of Legends", href: "#", current: true },
@@ -19,14 +20,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header />
-
-      <input
-        type="text"
-        name="Summoner"
-        id="Summoner"
-        className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-        placeholder="Summon Name"
-      />
+      <Search />
 
       {/* <footer className={styles.footer}>
         <a
