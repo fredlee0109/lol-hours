@@ -1,11 +1,13 @@
 import axios from "axios";
+// import "axios-progress-bar/dist/nprogress.css";
+// import "progress-bar-4-axios/dist/nprogress.css";
+import "x-axios-progress-bar/dist/nprogress.css";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import { loadProgressBar } from "axios-progress-bar";
-import "axios-progress-bar/dist/nprogress.css";
+import { loadProgressBar } from "x-axios-progress-bar";
 
-// https://github.com/rikmms/progress-bar-4-axios/
+// https://github.com/mszkb/progress-bar-4-axios#readme
 loadProgressBar();
 interface Props {
   region: string;
