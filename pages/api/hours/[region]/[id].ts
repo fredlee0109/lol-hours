@@ -46,7 +46,7 @@ export default async function handler(
       });
 
     let matchesPlayed = 0;
-    let lastMatchId = "";
+    let firstMatchId = "";
     let firstGameDate: Moment;
     const batchCount = 100; // 100 is maximum.
     for (let i = 0; i < 100; i++) {
@@ -62,30 +62,35 @@ export default async function handler(
       if (matches.length) {
         matchesPlayed += matches.length;
         console.log("matchesPlayed", matchesPlayed);
-        lastMatchId = matches[matches.length - 1];
+        firstMatchId = matches[matches.length - 1];
       } else {
         break;
       }
     }
 
-    if (lastMatchId) {
+    if (firstMatchId) {
       // https://developer.riotgames.com/apis#match-v5/GET_getMatch
-      const match: RiotAPITypes.MatchV5.MatchDTO =
-        await rAPI.matchV5.getMatchById({
-          cluster: cluster,
-          matchId: lastMatchId!,
-        });
-      firstGameDate = moment(match.info.gameCreation);
-      console.log(
-        "first match",
-        moment(firstGameDate),
-        match.info.gameName,
-        match.info.gameMode,
-        match.info.gameType,
-        match.info.gameVersion,
-        match.info.mapId,
-        match.info.queueId
-      );
+      try {
+        const match: RiotAPITypes.MatchV5.MatchDTO =
+          await rAPI.matchV5.getMatchById({
+            cluster: cluster,
+            matchId: firstMatchId!,
+          });
+        firstGameDate = moment(match.info.gameCreation);
+        console.log(
+          "first match",
+          moment(firstGameDate),
+          match.info.gameName,
+          match.info.gameMode,
+          match.info.gameType,
+          match.info.gameVersion,
+          match.info.mapId,
+          match.info.queueId
+        );
+      } catch (error) {
+        // Happened with summoner name = "test"
+        console.error("getMatchById ERROR", error);
+      }
     }
 
     const totalHoursSpent = matchesPlayed * 0.5;
@@ -97,7 +102,7 @@ export default async function handler(
       matchesPlayed: matchesPlayed,
     });
   } catch (error) {
-    console.error("api.ts ERROR: ", error, typeof error);
+    console.error("api.ts ERROR: ", error);
     res.status(500).send({});
   }
 }
