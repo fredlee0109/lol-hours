@@ -18,13 +18,13 @@ export default function Search() {
   }
 
   return (
-    <div className="fixed h-screen w-screen flex items-center justify-center bg-indigo-300">
+    <div className="fixed h-screen w-screen flex items-center justify-center">
       <div className="w-80 lg:w-[40rem] -mt-60">
         <form onSubmit={handleSubmit} className="relative">
           <input
             onChange={handleChange}
             value={state.summonerName}
-            className="rounded-sm pl-5 pr-24 h-12 w-full focus:outline-none 
+            className="rounded-sm pl-5 pr-24 h-12 w-full focus:outline-none bg-color-3 text-white
             border border-slate-300 focus:border-sky-500"
             type="text"
             name="Summoner"

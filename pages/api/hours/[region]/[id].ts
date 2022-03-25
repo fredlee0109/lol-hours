@@ -3,7 +3,6 @@ import "dotenv/config";
 import moment, { Moment } from "moment";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-console.log("process.env.NODE_ENV", process.env.NODE_ENV);
 console.log("process.env.RIOT_API_KEY", process.env.RIOT_API_KEY);
 
 const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
@@ -21,14 +20,13 @@ const rAPI = new RiotAPI(process.env.RIOT_API_KEY!, {
 });
 
 type ResponseData = {
-  matchesComputed?: number;
   totalHoursSpent?: number;
   dailyAverageHoursSpent?: number;
-  data?: RiotAPITypes.MatchV5.MatchDTO[];
   firstGameDate?: Moment;
-  daysSinceFirstGame?: number;
-  averageGameTime?: number;
   matchesPlayed?: number;
+  profileIcon?: string;
+  summonerName?: string;
+  summonerLevel?: number;
 };
 
 export default async function handler(
@@ -44,6 +42,7 @@ export default async function handler(
         region: region,
         summonerName: req.query.id as string,
       });
+    const profileIconsPromise = rAPI.ddragon.profileIcons();
 
     let matchesPlayed = 0;
     let firstMatchId = "";
@@ -93,6 +92,7 @@ export default async function handler(
       }
     }
 
+    const profileIcons = await profileIconsPromise;
     const totalHoursSpent = matchesPlayed * 0.5;
     res.status(200).send({
       totalHoursSpent: totalHoursSpent,
@@ -100,6 +100,13 @@ export default async function handler(
         totalHoursSpent / moment().diff(firstGameDate!, "d"),
       firstGameDate: firstGameDate!,
       matchesPlayed: matchesPlayed,
+      profileIcon: `http://ddragon.leagueoflegends.com/cdn/${
+        profileIcons.version
+      }/img/profileicon/${
+        profileIcons.data[summoner.profileIconId].image.full
+      }`,
+      summonerName: summoner.name,
+      summonerLevel: summoner.summonerLevel,
     });
   } catch (error) {
     console.error("api.ts ERROR: ", error);
